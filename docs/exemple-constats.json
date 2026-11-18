@@ -1,0 +1,9 @@
+{
+  "tool": "iso-audit",
+  "findings": [
+    { "check_id": "SEC-001", "titre": "Mot de passe administrateur trouvé en clair dans config.php", "severite": "HIGH", "controle": "A.5.17" },
+    { "check_id": "SEC-002", "titre": "Fichier de configuration serveur modifiable par tous les utilisateurs", "severite": "MEDIUM", "controle": "A.8.9" },
+    { "check_id": "SEC-003", "titre": "Connexion au panneau d'administration sans chiffrement TLS", "severite": "HIGH", "controle": "A.8.24" },
+    { "check_id": "SEC-004", "titre": "Composant logiciel avec vulnérabilité connue (CVE) non corrigée depuis 90 jours", "severite": "HIGH", "controle": "A.8.8" }
+  ]
+}

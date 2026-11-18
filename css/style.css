@@ -1,0 +1,359 @@
+/*
+  Langage visuel d'un dossier d'audit : la structure (rôles de couleur,
+  formes par palier, grille en multiples de 8, boutons remplis / contourés
+  / texte) suit les règles de Material Design ; le ton reste celui d'un
+  dossier de consultant (encre profonde, papier) plutôt que d'une
+  application grand public.
+*/
+
+:root {
+  /* Couleurs par rôle */
+  --primary: #0f6e63;
+  --on-primary: #ffffff;
+  --primary-container: #cde9e3;
+  --on-primary-container: #00201b;
+
+  --background: #f1f1e9;
+  --surface: #ffffff;
+  --surface-high: #e9ebe1;
+
+  --on-surface: #182620;
+  --on-surface-variant: #47534e;
+  --outline: #78857f;
+  --outline-variant: #c8d2cd;
+
+  --error: #ba1a1a;
+  --error-container: #ffdad4;
+  --on-error-container: #410001;
+
+  --font-display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+
+  /* Échelle séquentielle de maturité (0 à 5), tons assombris pour un texte
+     blanc lisible (contraste AA) sur chaque segment rempli */
+  --s0: #a0211c;
+  --s1: #a8431a;
+  --s2: #845c00;
+  --s3: #5a6b1a;
+  --s4: #356b2a;
+  --s5: #1a6b42;
+
+  /* Forme */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Élévation (ombres discrètes, pas de halo marqué) */
+  --elevation-1: 0 1px 2px rgba(27, 36, 48, .08), 0 1px 3px 1px rgba(27, 36, 48, .06);
+  --elevation-2: 0 1px 2px rgba(27, 36, 48, .1), 0 2px 6px 2px rgba(27, 36, 48, .08);
+
+  font-family: Roboto, Inter, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--on-surface);
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4 { margin: 0 0 8px; color: var(--on-surface); font-family: var(--font-display); font-weight: 400; }
+h1 { font-size: 1.625rem; line-height: 2.125rem; letter-spacing: .2px; }
+h2 { font-size: 1.5rem; line-height: 1.875rem; }
+h2 small { font-family: Roboto, Inter, "Segoe UI", system-ui, sans-serif; font-size: .8rem; color: var(--on-surface-variant); }
+h3 { font-size: 1.125rem; line-height: 1.5rem; }
+h4 { font-size: 1rem; }
+
+/* ---- Boutons : rempli (action principale), contouré (par défaut), texte ---- */
+button {
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  letter-spacing: .1px;
+  cursor: pointer;
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  padding: 10px 24px;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+button:hover { background: var(--surface-high); }
+button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+button.suivant {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+button.suivant:hover { background: #0b554c; border-color: #0b554c; }
+
+button.lien {
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--primary);
+  padding: 6px 10px;
+  text-decoration: none;
+}
+button.lien:hover { background: var(--primary-container); }
+
+#app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-areas: "entete entete" "nav contenu";
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ---- Barre d'application (en-tête) ---- */
+.entete {
+  grid-area: entete;
+  padding: 16px 24px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--outline-variant);
+}
+.entete h1 { color: var(--primary); }
+
+/* Indicateur de progression linéaire */
+.progression-globale { height: 4px; background: var(--primary-container); border-radius: var(--radius-full); overflow: hidden; margin-top: 8px; }
+.progression-barre { height: 100%; width: 0; background: var(--primary); border-radius: var(--radius-full); transition: width .2s; }
+
+.message { color: var(--primary); font-weight: 500; font-size: .875rem; margin: 8px 0 0; }
+
+.bandeau-impression { display: none; }
+.bandeau-impression p { margin: 0 0 4px; }
+
+/* ---- Rail de navigation (bureau) / onglets défilants (mobile) ---- */
+.nav {
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+  background: var(--background);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  z-index: 2;
+}
+.nav-item {
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--on-surface-variant);
+  padding: 10px 16px;
+  font-weight: 500;
+}
+.nav-item:hover { background: var(--surface-high); }
+.nav-item.nav-actif { background: var(--primary-container); color: var(--on-primary-container); }
+.nav-etape {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border: 1px solid var(--outline);
+  border-radius: 50%;
+  font-size: .6875rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+}
+.nav-item.nav-actif .nav-etape { border-color: var(--on-primary-container); color: var(--on-primary-container); }
+.nav-item.nav-fait .nav-etape { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+
+main#contenu { grid-area: contenu; padding: 20px 28px 40px; }
+
+.ecran { max-width: 760px; }
+
+/* ---- Écran d'accueil : page de couverture du dossier, sans rail de
+   navigation puisqu'il n'y a encore aucune progression à montrer. ---- */
+.accueil {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+.accueil-fil { color: var(--primary); font-weight: 500; font-size: .875rem; margin: 0 0 8px; }
+.accueil-lead { font-size: 1.125rem; color: var(--on-surface-variant); }
+.accueil-points { padding-left: 20px; margin: 16px 0; }
+.accueil-points li { margin-bottom: 6px; }
+.accueil .suivant { margin-top: 8px; }
+
+.avertissement {
+  background: var(--error-container);
+  color: var(--on-error-container);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: .875rem;
+}
+
+.ecran-description { color: var(--on-surface-variant); max-width: 62ch; margin: 0 0 16px; }
+
+/* ---- Formulaire Organisation ---- */
+.formulaire-org { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.champ { display: flex; flex-direction: column; gap: 4px; font-size: .8125rem; color: var(--on-surface-variant); }
+.champ input, .champ select {
+  padding: 12px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: .9375rem;
+  color: var(--on-surface);
+  background: var(--surface);
+}
+.champ input:focus-visible, .champ select:focus-visible { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+.legende-echelle { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 0; margin: 16px 0; font-size: .8125rem; color: var(--on-surface-variant); }
+.legende-echelle li { display: flex; align-items: center; gap: 6px; }
+.pastille { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+.actions-org { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+
+/* ---- Cartes (contourées, forme moyenne) ---- */
+.liste-cartes { display: grid; gap: 12px; margin: 16px 0; }
+.carte {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+.carte-entete { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.carte-ref { font-weight: 500; color: var(--primary); font-size: .875rem; }
+.carte-titre { margin: 4px 0; }
+.carte-question { color: var(--on-surface-variant); margin: 0 0 12px; }
+
+/* Puces (badges de criticité) */
+.badge { font-size: .75rem; font-weight: 500; padding: 4px 12px; border-radius: var(--radius-full); border: 1px solid transparent; white-space: nowrap; }
+.badge-3 { background: var(--error-container); color: var(--on-error-container); }
+.badge-2 { background: #ffe8c7; color: #5c3f00; }
+.badge-1 { background: var(--surface-high); color: var(--on-surface-variant); border-color: var(--outline-variant); }
+
+/* ---- Contrôles segmentés (échelle 0-5 + N/A, filtre) ---- */
+.echelle, .filtre {
+  display: flex;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  width: fit-content;
+  margin: 12px 0;
+}
+.echelle-bouton, .filtre button {
+  border: none;
+  border-right: 1px solid var(--outline);
+  border-radius: 0;
+  background: var(--surface);
+  padding: 10px 16px;
+  font-weight: 500;
+}
+.echelle-bouton:last-child, .filtre button:last-child { border-right: none; }
+.filtre button[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+
+.echelle-bouton[data-score-niveau="0"] { color: var(--s0); }
+.echelle-bouton[data-score-niveau="1"] { color: var(--s1); }
+.echelle-bouton[data-score-niveau="2"] { color: var(--s2); }
+.echelle-bouton[data-score-niveau="3"] { color: var(--s3); }
+.echelle-bouton[data-score-niveau="4"] { color: var(--s4); }
+.echelle-bouton[data-score-niveau="5"] { color: var(--s5); }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="0"] { background: var(--s0); color: #fff; }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="1"] { background: var(--s1); color: #fff; }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="2"] { background: var(--s2); color: #fff; }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="3"] { background: var(--s3); color: #fff; }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="4"] { background: var(--s4); color: #fff; }
+.echelle-bouton[aria-pressed="true"][data-score-niveau="5"] { background: var(--s5); color: #fff; }
+.echelle-na { color: var(--on-surface-variant); }
+.echelle-na[aria-pressed="true"] { background: var(--on-surface); color: #fff; }
+
+.pastille[data-score-niveau="0"] { background: var(--s0); }
+.pastille[data-score-niveau="1"] { background: var(--s1); }
+.pastille[data-score-niveau="2"] { background: var(--s2); }
+.pastille[data-score-niveau="3"] { background: var(--s3); }
+.pastille[data-score-niveau="4"] { background: var(--s4); }
+.pastille[data-score-niveau="5"] { background: var(--s5); }
+
+/* Constats importés */
+.constats { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 4px; font-size: .8125rem; }
+.constat { border-left: 3px solid var(--outline-variant); padding: 6px 12px; background: var(--background); border-radius: 0 var(--radius-xs) var(--radius-xs) 0; }
+.constat-high { border-color: var(--s0); }
+.constat-medium { border-color: var(--s2); }
+.constat-low { border-color: var(--s4); }
+.constat-source { color: var(--on-surface-variant); }
+
+.carte-actions { display: flex; gap: 4px; margin-top: 8px; }
+.carte-recommandation { margin-top: 12px; padding: 12px 16px; background: var(--primary-container); color: var(--on-primary-container); border-radius: var(--radius-sm); font-size: .875rem; }
+.masque { display: none; }
+.carte-note {
+  width: 100%;
+  min-height: 80px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: .875rem;
+  color: var(--on-surface);
+}
+.carte-note:focus-visible { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+.navigation-ecran { display: flex; justify-content: space-between; margin-top: 24px; }
+.vide { color: var(--on-surface-variant); }
+
+/* ---- Résultats ---- */
+.indicateurs { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.indicateur { background: var(--primary-container); color: var(--on-primary-container); border-radius: var(--radius-lg); padding: 16px 24px; min-width: 140px; text-align: center; }
+.indicateur-valeur { display: block; font-size: 1.75rem; font-weight: 500; }
+.indicateur-libelle { font-size: .8125rem; }
+
+.note-certification { color: var(--on-surface-variant); font-size: .9375rem; max-width: 62ch; }
+
+/* Radar et barres par domaine côte à côte : l'un confirme visuellement
+   l'autre, les afficher ensemble évite une longue page à faire défiler
+   pour recomposer la même information deux fois. L'écran Résultats est
+   plus large que les autres pour laisser au radar une taille lisible. */
+.ecran-resultats { max-width: 920px; }
+.radar-et-barres { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; margin: 16px 0; }
+.radar { flex: 1 1 380px; max-width: 460px; display: block; }
+.radar-axe { stroke: var(--outline-variant); stroke-width: 1; }
+.radar-forme { fill: rgba(15, 110, 99, .22); stroke: var(--primary); stroke-width: 2; }
+.radar-libelle { font-size: 9px; fill: var(--on-surface-variant); }
+
+.barres-domaines { flex: 1 1 320px; display: grid; gap: 8px; margin: 0; align-self: stretch; align-content: center; }
+.barre-domaine { display: grid; grid-template-columns: 40px 1fr 48px; align-items: center; gap: 8px; font-size: .8125rem; }
+.barre-fond { background: var(--primary-container); border-radius: var(--radius-full); overflow: hidden; height: 8px; }
+.barre-valeur { height: 100%; width: 0; background: var(--primary); border-radius: var(--radius-full); }
+
+.top-ecarts { padding-left: 20px; }
+.plan { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+.plan-horizon { background: var(--surface); border: 1px solid var(--outline-variant); border-radius: var(--radius-md); padding: 16px; }
+.plan-horizon ul { padding-left: 18px; font-size: .8125rem; margin: 0; }
+
+.actions-resultats { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+
+@media (max-width: 860px) {
+  #app { grid-template-columns: 1fr; grid-template-areas: "entete" "nav" "contenu"; }
+  .nav { flex-direction: row; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--outline-variant); padding: 8px 12px; }
+  .nav-item { border-radius: 0; background: none; padding: 10px 12px; border-bottom: 2px solid transparent; }
+  .nav-item.nav-actif { background: none; color: var(--primary); border-bottom-color: var(--primary); }
+  main#contenu { padding: 16px; }
+  .formulaire-org { grid-template-columns: 1fr; }
+  .plan { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .nav, .entete, .actions-org, .actions-resultats, .filtre, .navigation-ecran, .carte-actions { display: none; }
+  .bandeau-impression { display: block; border-bottom: 2px solid var(--on-surface); padding-bottom: 8px; margin-bottom: 16px; font-size: .875rem; }
+  #app { display: block; }
+  main#contenu { padding: 0; }
+  body { background: #fff; }
+  .carte { break-inside: avoid; }
+}

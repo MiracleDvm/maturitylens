@@ -1,0 +1,14 @@
+{
+  "name": "maturitylens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auto-évaluation de maturité ISO/IEC 27001:2022, HTML/CSS/JS pur, zéro dépendance d'exécution.",
+  "scripts": {
+    "test": "node --test",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "license": "MIT"
+}
