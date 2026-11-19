@@ -12,5 +12,11 @@
     "no-undef": "error",
     "no-unused-vars": "warn",
     "eqeqeq": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["tests/e2e/**/*.js", "playwright.config.js"],
+      "parserOptions": { "ecmaVersion": 2020 }
+    }
+  ]
 }

@@ -5,9 +5,11 @@
   "description": "Auto-évaluation de maturité ISO/IEC 27001:2022, HTML/CSS/JS pur, zéro dépendance d'exécution.",
   "scripts": {
     "test": "node --test",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "eslint": "^8.57.0"
   },
   "license": "MIT"
