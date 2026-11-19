@@ -1,8 +1,8 @@
 # MaturityLens
 
-[![CI](https://github.com/<votre-compte>/maturitylens/actions/workflows/ci.yml/badge.svg)](https://github.com/<votre-compte>/maturitylens/actions/workflows/ci.yml)
+[![CI](https://github.com/MiracleDvm/maturitylens/actions/workflows/ci.yml/badge.svg)](https://github.com/MiracleDvm/maturitylens/actions/workflows/ci.yml)
 
-**Démo en ligne : https://<votre-compte>.github.io/maturitylens/**
+**Démo en ligne : https://MiracleDvm.github.io/maturitylens/**
 
 MaturityLens est un outil web d'auto-évaluation qui mesure en une séance d'environ 30 minutes la maturité d'un Système de Management de la Sécurité de l'Information (SMSI) face à ISO/IEC 27001:2022, puis produit des écarts priorisés et un plan d'action.
 
@@ -17,19 +17,26 @@ Avant un projet ISO 27001, une organisation doit savoir où elle en est. Ce pré
 - Indicateur de préparation à la certification (clauses 4 à 10 toutes ≥ niveau cible).
 - Radar SVG à 11 axes, tableaux de synthèse par domaine.
 - Export Markdown, impression PDF, export/import JSON (session complète, réimportable).
-- Import de constats techniques d'un scanner (projet compagnon [iso-audit](#)) rattachés automatiquement à la mesure concernée.
+- Import de constats techniques d'un scanner (projet compagnon, à venir) rattachés automatiquement à la mesure concernée.
 - Fonctionnement **100 % local** : aucune donnée ne quitte le navigateur, aucune requête réseau après le chargement de la page.
 
 ## Utiliser l'outil
 
 Ouvrir `index.html` directement dans un navigateur (double-clic, fonctionne en `file://`), ou visiter la démo en ligne. Cliquer sur « Charger un exemple » pour explorer l'outil avec des données fictives.
 
+## Captures
+
+| Questionnaire | Résultats |
+| --- | --- |
+| ![Questionnaire](docs/questionnaire.png) | ![Résultats](docs/resultats.png) |
+
 ## Développement
 
 Zéro dépendance d'exécution, zéro build. HTML/CSS/JavaScript pur (modules IIFE).
 
 ```bash
-node --test            # lance les tests (référentiel, moteur de calcul, rapports)
+node --test             # lance les tests (référentiel, moteur de calcul, rapports)
+npm run test:e2e        # parcours complet en navigateur (Playwright), zéro erreur console attendue
 python3 -m http.server 8000   # sert l'application en local
 ```
 
@@ -45,8 +52,8 @@ js/
   scoring.js             calculs purs (maturité, écarts, priorités, horizons, certification)
   report.js              rapport Markdown, export/import JSON, import de constats
   app.js                  interface, état, événements, radar SVG, sauvegarde locale
-tests/                  tests node:test
-docs/                   dossier de conception, exemple de constats pour l'import
+tests/                  tests node:test et tests Playwright (tests/e2e/)
+docs/                   captures d'écran et exemple de constats pour l'import
 ```
 
 ## Limites
