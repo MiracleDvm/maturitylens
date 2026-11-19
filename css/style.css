@@ -317,18 +317,26 @@ main#contenu { grid-area: contenu; padding: 20px 28px 40px; }
 .note-certification { color: var(--on-surface-variant); font-size: .9375rem; max-width: 62ch; }
 
 /* Radar et barres par domaine côte à côte : l'un confirme visuellement
-   l'autre, les afficher ensemble évite une longue page à faire défiler
-   pour recomposer la même information deux fois. L'écran Résultats est
-   plus large que les autres pour laisser au radar une taille lisible. */
+   l'autre. L'écran Résultats est plus large que les autres, et le radar
+   occupe toute cette largeur plutôt que de partager une colonne : avec
+   11 axes, c'est la seule façon de garder des libellés lisibles
+   (>= 13px affichés) sans qu'ils se chevauchent. */
 .ecran-resultats { max-width: 920px; }
-.radar-et-barres { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; margin: 16px 0; }
-.radar { flex: 1 1 380px; max-width: 460px; display: block; }
+.radar-bloc { margin: 16px auto; }
+.radar { width: 100%; display: block; }
 .radar-axe { stroke: var(--outline-variant); stroke-width: 1; }
 .radar-forme { fill: rgba(15, 110, 99, .22); stroke: var(--primary); stroke-width: 2; }
-.radar-libelle { font-size: 9px; fill: var(--on-surface-variant); }
+.radar-cible { fill: none; stroke: var(--on-surface-variant); stroke-width: 2; stroke-dasharray: 10 8; }
+.radar-libelle { font-size: 17px; fill: var(--on-surface-variant); }
 
-.barres-domaines { flex: 1 1 320px; display: grid; gap: 8px; margin: 0; align-self: stretch; align-content: center; }
-.barre-domaine { display: grid; grid-template-columns: 40px 1fr 48px; align-items: center; gap: 8px; font-size: .8125rem; }
+.radar-legende { display: flex; gap: 16px; justify-content: center; margin-top: 4px; font-size: .8125rem; color: var(--on-surface-variant); }
+.legende-item { display: flex; align-items: center; gap: 6px; }
+.legende-trait { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
+.legende-actuel { border-top-color: var(--primary); }
+.legende-cible { border-top-style: dashed; border-top-color: var(--on-surface-variant); }
+
+.barres-domaines { display: grid; gap: 8px; margin: 16px 0; }
+.barre-domaine { display: grid; grid-template-columns: 110px 1fr 44px; align-items: center; gap: 8px; font-size: .8125rem; }
 .barre-fond { background: var(--primary-container); border-radius: var(--radius-full); overflow: hidden; height: 8px; }
 .barre-valeur { height: 100%; width: 0; background: var(--primary); border-radius: var(--radius-full); }
 

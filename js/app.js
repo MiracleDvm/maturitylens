@@ -268,27 +268,40 @@
     return { x: cx + r * Math.sin(rad), y: cy - r * Math.cos(rad) };
   }
 
-  function rendreRadar(axes) {
-    // Marge large autour du cercle : les libellés les plus longs
-    // ("Organisationnel (n.é.)") doivent rester dans le viewBox, jamais
-    // rognés par le cadre de l'SVG.
-    var cx = 280, cy = 190, rMax = 90;
+  function abrege(mot) {
+    return mot.length > 9 ? mot.slice(0, 7) + "." : mot;
+  }
+
+  function rendreRadar(axes, cible) {
+    // Géométrie calculée pour qu'un libellé abrégé (9 caractères max par
+    // ligne) reste à la fois lisible (>= 13px affichés sur la largeur
+    // pleine de l'écran Résultats) et sans chevauchement entre axes voisins
+    // ni rognage par le cadre du SVG.
+    var cx = 500, cy = 500, rMax = 230;
     var n = axes.length;
-    var pointsDonnees = axes.map(function (a, i) {
-      var p = polaire(cx, cy, (a.valeur / 5) * rMax, i * (360 / n));
-      return p.x.toFixed(1) + "," + p.y.toFixed(1);
-    }).join(" ");
+    function points(valeur) {
+      return axes.map(function (a, i) {
+        var p = polaire(cx, cy, valeur(a) * rMax, i * (360 / n));
+        return p.x.toFixed(1) + "," + p.y.toFixed(1);
+      }).join(" ");
+    }
     var axesSvg = axes.map(function (a, i) {
       var angle = i * (360 / n);
       var fin = polaire(cx, cy, rMax, angle);
-      var label = polaire(cx, cy, rMax + 22, angle);
+      var label = polaire(cx, cy, rMax + 30, angle);
       var ancre = label.x < cx - 5 ? "end" : label.x > cx + 5 ? "start" : "middle";
+      var mots = a.libelle.split(" ");
+      var lignes = [abrege(mots[0])].concat(mots.length > 1 ? [mots.slice(1).join(" ")] : []);
+      var tspans = lignes.map(function (ligne, i2) {
+        return '<tspan x="' + label.x.toFixed(1) + '"' + (i2 > 0 ? ' dy="1.15em"' : "") + ">" + esc(ligne) + "</tspan>";
+      }).join("");
       return '<line x1="' + cx + '" y1="' + cy + '" x2="' + fin.x.toFixed(1) + '" y2="' + fin.y.toFixed(1) + '" class="radar-axe"></line>' +
-        '<text x="' + label.x.toFixed(1) + '" y="' + label.y.toFixed(1) + '" text-anchor="' + ancre + '" class="radar-libelle">' + esc(a.libelle) + "</text>";
+        '<text x="' + label.x.toFixed(1) + '" y="' + label.y.toFixed(1) + '" text-anchor="' + ancre + '" class="radar-libelle">' + tspans + "</text>";
     }).join("");
-    return '<svg viewBox="0 0 560 380" role="img" aria-label="Radar de maturité par domaine, 11 axes" class="radar">' +
+    return '<svg viewBox="0 0 1000 1000" role="img" aria-label="Radar de maturité par domaine, 11 axes, niveau actuel comparé au niveau cible" class="radar">' +
       axesSvg +
-      '<polygon points="' + pointsDonnees + '" class="radar-forme"></polygon>' +
+      '<polygon points="' + points(function () { return cible / 5; }) + '" class="radar-cible"></polygon>' +
+      '<polygon points="' + points(function (a) { return a.valeur / 5; }) + '" class="radar-forme"></polygon>' +
       "</svg>";
   }
 
@@ -308,10 +321,11 @@
       return '<div class="indicateur"><span class="indicateur-valeur">' + valeur + '</span><span class="indicateur-libelle">' + esc(libelle) + "</span></div>";
     }
 
+    var NOMS_DOMAINE = { CL: "Clauses 4-10", A5: "Organisationnel", A6: "Humain", A7: "Physique", A8: "Technologique" };
     var barres = ["CL", "A5", "A6", "A7", "A8"].map(function (section) {
       var m = SCORING.maturiteParSection(ITEMS, reponses, section);
       var pct = m.compte === 0 ? 0 : m.pourcentage;
-      return '<div class="barre-domaine"><span class="barre-nom">' + esc(section) + '</span>' +
+      return '<div class="barre-domaine"><span class="barre-nom">' + esc(NOMS_DOMAINE[section]) + '</span>' +
         '<div class="barre-fond"><div class="barre-valeur" data-largeur="' + pct + '"></div></div>' +
         '<span class="barre-pct">' + pct + "%</span></div>";
     }).join("");
@@ -326,17 +340,27 @@
       return '<div class="plan-horizon"><h4>' + h + " mois</h4><ul>" + (lignes || "<li>Aucune action.</li>") + "</ul></div>";
     }).join("");
 
+    var actionsResultats = '<div class="actions-resultats">' +
+      '<button type="button" data-action="export-md">Exporter le rapport (Markdown)</button>' +
+      '<button type="button" data-action="export-json">Exporter la session (JSON)</button>' +
+      (APERCU ? "" : '<button type="button" data-action="imprimer">Imprimer / PDF</button>') +
+      "</div>";
+
     return [
       '<section class="ecran ecran-resultats">',
       "<h2>Résultats</h2>",
       '<p class="avertissement">' + esc(REPORT.AVERTISSEMENT) + "</p>",
+      actionsResultats,
       '<div class="indicateurs">',
       indicateur("Maturité globale", global),
       indicateur("Clauses 4-10", clauses),
       indicateur("Annexe A", annexeA),
       '<div class="indicateur"><span class="indicateur-valeur">' + ecarts.length + '</span><span class="indicateur-libelle">Écarts identifiés</span></div>',
       "</div>",
-      '<div class="radar-et-barres">' + rendreRadar(axes) + '<div class="barres-domaines">' + barres + "</div></div>",
+      '<div class="radar-bloc">' + rendreRadar(axes, cible) +
+        '<div class="radar-legende"><span class="legende-item"><span class="legende-trait legende-actuel"></span>Niveau actuel</span>' +
+        '<span class="legende-item"><span class="legende-trait legende-cible"></span>Cible</span></div></div>',
+      '<div class="barres-domaines">' + barres + "</div>",
       "<h3>Dix écarts prioritaires</h3>",
       "<ol class=\"top-ecarts\">" + (topEcarts || "<li>Aucun écart sous la cible.</li>") + "</ol>",
       "<h3>Plan d'action</h3>",
@@ -346,11 +370,7 @@
           : "Avant d'envisager une certification, traiter en priorité les écarts sur les clauses 4 à 10 ci-dessous : elles doivent toutes atteindre le niveau cible.") +
       "</p>",
       '<div class="plan">' + planHtml + "</div>",
-      '<div class="actions-resultats">',
-      '<button type="button" data-action="export-md">Exporter le rapport (Markdown)</button>',
-      '<button type="button" data-action="export-json">Exporter la session (JSON)</button>',
-      APERCU ? "" : '<button type="button" data-action="imprimer">Imprimer / PDF</button>',
-      "</div>",
+      actionsResultats,
       '<button type="button" data-action="aller" data-ecran="A8">Revenir au questionnaire</button>',
       "</section>"
     ].join("");
